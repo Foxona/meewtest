@@ -1,51 +1,60 @@
 import { NextPage } from "next";
-import React, { useEffect } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { Form, Input, Button, Row, Col } from "antd";
+import React from "react";
+import { Button, Form } from "react-bootstrap";
+import { SubmitHandler, useForm } from "react-hook-form";
 import Layout from "../components/Layout";
 import { Configuration, UsersApi } from "./api/dist";
+import { UserAuth } from "../api/dist/models";
 
 const AuthPage: NextPage = () => {
-  useEffect(() => {
-    const config = new Configuration();
-    config.basePath = "https://ryikku.meew.me";
+  const config = new Configuration();
+  config.basePath = "https://ryikku.meew.me";
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<UserAuth>();
+  const onSubmit: SubmitHandler<UserAuth> = (data) => {
     const userApi = new UsersApi(config);
     userApi
-      .createUserUsersPost({
-        name: "Vedergo2",
-        login: "ryikku",
-        password: "123456",
-        comment: "test",
+      .authUserUsersAuthPost({
+        login: data.login,
+        password: data.password,
       })
-      .then((res) => console.log(res))
+      .then((res) => {
+        console.log(res.data);
+        window.localStorage.setItem("token", res.data.user_jwt);
+      })
       .catch((err) => console.log(err));
-  }, []);
-
-  const onFinish = (data) => {
-    console.log(data);
   };
 
   return (
     <Layout>
-      <Row justify="center">
-        <Col xs={20} sm={14} md={14} lg={8} xl={4}>
-          {/* <Col span={12} offset={6}> */}
-          <Form name="basic" onFinish={onFinish}>
-            <Form.Item label="Username" name="username">
-              <Input />
-            </Form.Item>
-            <Form.Item label="Password" name="password">
-              <Input.Password />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </Col>
-      </Row>
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Form.Group className="mb-3" controlId="formBasicEmail">
+          <Form.Label>Email address</Form.Label>
+          <Form.Control
+            type="login"
+            placeholder="Enter email"
+            {...register("login")}
+          />
+        </Form.Group>
+        {errors.login && <span>Login is required</span>}
+        <Form.Group className="mb-3" controlId="formBasicPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            type="password"
+            placeholder="Password"
+            {...register("password", { required: true })}
+          />
+        </Form.Group>
+        {errors.password && <span>Password is required</span>}
+        <Button variant="primary" type="submit">
+          Submit
+        </Button>
+      </Form>
     </Layout>
   );
 };

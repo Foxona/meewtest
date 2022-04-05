@@ -1,17 +1,18 @@
 import { Layout } from "antd";
+import { Container, Row, Col } from "react-bootstrap";
+import Navbar from "./Navbar";
 
 const LayoutComponent = (props) => {
   //  make responsive layout component with ant design
   return (
-    <Layout style={{ height: "100vh" }}>
-      <Layout.Header>
-        <h1>Header</h1>
-      </Layout.Header>
-      <Layout.Content>{props.children}</Layout.Content>
-      <Layout.Footer>
-        <h1>Footer</h1>
-      </Layout.Footer>
-    </Layout>
+    <Container fluid>
+      <Navbar />
+      <Row>
+        <Col>
+          <div className="bg-light border p-3">{props.children}</div>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

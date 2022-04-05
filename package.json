@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "gen": "rm -rf ./api/ && docker run -u $(id -u ${USER}):$(id -g ${USER}) --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/openapi.json -g typescript -o /local/api/ --additional-properties=usePromises=true,paramNaming=original,modelPropertyNaming=original,enumPropertyNaming=original"
   },
   "dependencies": {
     "antd": "^4.19.5",
