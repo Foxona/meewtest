@@ -5,14 +5,16 @@ import Navbar from "./Navbar";
 const LayoutComponent = (props) => {
   //  make responsive layout component with ant design
   return (
-    <Container fluid>
+    <>
       <Navbar />
-      <Row>
-        <Col>
-          <div className="bg-light border p-3">{props.children}</div>
-        </Col>
-      </Row>
-    </Container>
+      <div className="bg-light border p-3 vh-100">
+        <Container fluid className="container-sm">
+          <Row>
+            <Col>{props.children}</Col>
+          </Row>
+        </Container>
+      </div>
+    </>
   );
 };
 
