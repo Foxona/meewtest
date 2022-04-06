@@ -4,10 +4,10 @@ import { Button } from "react-bootstrap";
 import { useEffect, useState } from "react";
 
 const NavbarComponent = () => {
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState<string>("");
 
   useEffect(() => {
-    setToken(window.localStorage.getItem("token"));
+    setToken(window.localStorage.getItem("token") || "");
   }, []);
 
   return (

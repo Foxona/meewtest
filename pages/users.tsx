@@ -110,7 +110,7 @@ const UserList = (props: { users: User[] }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const { users } = props;
 
-  const handleRemove = (e, id: number) => {
+  const handleRemove = (e: React.MouseEvent, id: number) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -154,11 +154,17 @@ const UserList = (props: { users: User[] }) => {
                   Comment: <span className="fw-bold">{user.comment}</span>
                 </div>
                 <div>
-                  Created at: <span className="fw-bold">{user.created_at.toUTCString()}</span>
+                  Created at:{" "}
+                  <span className="fw-bold">
+                    {user.created_at.toUTCString()}
+                  </span>
                 </div>
                 {user.updated_at && (
                   <div>
-                    Updated at: <span className="fw-bold">{user.updated_at.toUTCString()}</span>
+                    Updated at:{" "}
+                    <span className="fw-bold">
+                      {user.updated_at.toUTCString()}
+                    </span>
                   </div>
                 )}
               </div>

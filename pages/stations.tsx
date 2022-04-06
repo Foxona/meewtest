@@ -93,7 +93,7 @@ const StationList = (props: { stations: Station[] }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const { stations } = props;
 
-  const handleRemove = (e, id: number) => {
+  const handleRemove = (e: React.MouseEvent, id: number) => {
     e.preventDefault();
     e.stopPropagation();
 
