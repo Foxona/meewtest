@@ -6,22 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "gen": "rm -rf ./api/ && docker run -u $(id -u ${USER}):$(id -g ${USER}) --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/openapi.json -g typescript -o /local/api/ --additional-properties=usePromises=true,paramNaming=original,modelPropertyNaming=original,enumPropertyNaming=original"
+    "lint": "next lint"
   },
   "dependencies": {
-    "antd": "^4.19.5",
-    "axios": "^0.26.1",
-    "bootstrap": "^5.1.3",
-    "bootstrap-icons": "^1.8.1",
-    "next": "12.1.4",
-    "react": "18.0.0",
-    "react-bootstrap": "^2.2.2",
-    "react-dom": "18.0.0",
-    "react-hook-form": "^7.29.0",
-    "swr": "^1.2.2",
-    "url-parse": "^1.5.10",
-    "whatwg-fetch": "^3.6.2"
+    "next": "^12.1",
+    "query-string": "^7.1.1",
+    "react": "^17.0.0",
+    "react-admin": "^3.19.11",
+    "react-dom": "^17.0.0"
   },
   "devDependencies": {
     "@types/node": "17.0.23",
