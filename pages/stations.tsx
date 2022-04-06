@@ -13,8 +13,8 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import useSWR from "swr";
 import Link from "next/link";
 
-const token =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.nuILLQ7XJaxFMhhzPP9u-tID7S5opHSA9qaDCmAqE-I";
+// const token =
+//   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.nuILLQ7XJaxFMhhzPP9u-tID7S5opHSA9qaDCmAqE-I";
 
 const cfg = createConfiguration({
   baseServer: new ServerConfiguration("https://ryikku.meew.me", {}),
@@ -45,8 +45,9 @@ const StationModal = (props: {
       )
       .then((res) => {
         console.log(res);
+        window.location.href = "/stations";
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err.response));
   };
 
   const handleClose = () => setShowModal(false);
@@ -59,7 +60,7 @@ const StationModal = (props: {
             <Modal.Title>Create New Station</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Group controlId="name">
               <Form.Label>Station Name</Form.Label>
               <Form.Control
                 placeholder="Epsilon 13"
@@ -67,10 +68,12 @@ const StationModal = (props: {
                 {...register("name", { required: true })}
               />
             </Form.Group>
-            <Form.Group
-              className="mb-3"
-              controlId="exampleForm.ControlTextarea1"
-            >
+            <p>
+              {errors.name && (
+                <span className="text-danger">Station name is required</span>
+              )}
+            </p>
+            <Form.Group controlId="comment">
               <Form.Label>Comment</Form.Label>
               <Form.Control as="textarea" rows={3} {...register("comment")} />
             </Form.Group>
@@ -99,6 +102,7 @@ const StationList = (props: { stations: Station[] }) => {
 
     stationsApi.deleteStationStationsIdDelete(id, token).then((res) => {
       console.log(res);
+      window.location.href = "/stations";
     });
   };
 

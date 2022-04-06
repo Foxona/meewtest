@@ -11,11 +11,8 @@ const NavbarComponent = () => {
   }, []);
 
   return (
-    <Navbar bg="light" variant="light">
+    <Navbar bg="light" variant="light" sticky="top" className="border-bottom">
       <Container>
-        <Navbar.Brand>
-          <Link href="/auth">Auth</Link>
-        </Navbar.Brand>
         <Navbar.Brand>
           <Link href="/users">Users</Link>
         </Navbar.Brand>
@@ -25,6 +22,7 @@ const NavbarComponent = () => {
         {token ? (
           <Nav className="d-flex gap-3 ms-auto">
             <Button
+              variant="outline-primary"
               onClick={() => {
                 window.localStorage.removeItem("token");
                 window.location.href = "/auth";

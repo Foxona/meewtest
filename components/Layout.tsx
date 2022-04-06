@@ -12,7 +12,7 @@ const LayoutComponent = (props: LayoutProps) => {
   return (
     <>
       <Navbar />
-      <div className="bg-light border p-3 vh-100">
+      <div className="bg-light border p-3 min-vh-100">
         <Container fluid className="container-sm">
           <Row>
             <Col>{props.children}</Col>

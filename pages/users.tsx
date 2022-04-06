@@ -13,8 +13,8 @@ import {
 import Layout from "../components/Layout";
 import Link from "next/link";
 
-const token =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.nuILLQ7XJaxFMhhzPP9u-tID7S5opHSA9qaDCmAqE-I";
+// const token =
+//   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.nuILLQ7XJaxFMhhzPP9u-tID7S5opHSA9qaDCmAqE-I";
 
 const cfg = createConfiguration({
   baseServer: new ServerConfiguration("https://ryikku.meew.me", {}),
@@ -44,6 +44,7 @@ const UserModal = (props: {
       })
       .then((res) => {
         console.log(res);
+        window.location.href = "/users";
       })
       .catch((err) => console.log(err));
   };
@@ -58,7 +59,7 @@ const UserModal = (props: {
             <Modal.Title>Create New User</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Form.Group className="mb-3" controlId="username">
+            <Form.Group controlId="username">
               <Form.Label>User Name</Form.Label>
               <Form.Control
                 placeholder="Enter Username"
@@ -66,7 +67,12 @@ const UserModal = (props: {
                 {...register("name", { required: true })}
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="login">
+            <p>
+              {errors.name && (
+                <span className="text-danger">Username is required</span>
+              )}
+            </p>
+            <Form.Group controlId="login">
               <Form.Label>Login</Form.Label>
               <Form.Control
                 type="text"
@@ -75,7 +81,12 @@ const UserModal = (props: {
                 {...register("login", { required: true })}
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="password">
+            <p>
+              {errors.login && (
+                <span className="text-danger">Login is required</span>
+              )}
+            </p>
+            <Form.Group controlId="password">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
@@ -84,10 +95,12 @@ const UserModal = (props: {
                 {...register("password", { required: true })}
               />
             </Form.Group>
-            <Form.Group
-              className="mb-3"
-              controlId="exampleForm.ControlTextarea1"
-            >
+            <p>
+              {errors.password && (
+                <span className="text-danger">Password is required</span>
+              )}
+            </p>
+            <Form.Group controlId="comment">
               <Form.Label>Comment</Form.Label>
               <Form.Control as="textarea" rows={3} {...register("comment")} />
             </Form.Group>
@@ -116,6 +129,7 @@ const UserList = (props: { users: User[] }) => {
 
     usersApi.deleteUserUsersIdDelete(id, token).then((res) => {
       console.log(res);
+      window.location.href = "/users";
     });
   };
 

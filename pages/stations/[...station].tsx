@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import React, { useEffect, useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Row, Col } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Layout from "../../components/Layout";
 import {
@@ -31,7 +31,7 @@ const StationForm = () => {
   useEffect(() => {
     // const id = parseInt(router?.query?.station[1]);
 
-    stationsApi.getStationByIdStationsIdGet(42, token).then((res) => {
+    stationsApi.getStationByIdStationsIdGet(33, token).then((res) => {
       setStationEntity(res);
     });
   }, [router.query]);
@@ -56,6 +56,7 @@ const StationForm = () => {
       )
       .then((res) => {
         console.log(res);
+        window.location.href = "/stations";
       })
       .catch((err) => console.log(err));
   };
@@ -63,7 +64,7 @@ const StationForm = () => {
   return (
     <>
       <Link href={"/stations"} passHref>
-        <Button variant="secondary" size="sm">
+        <Button variant="outline-secondary" size="sm">
           Back
         </Button>
       </Link>
@@ -118,7 +119,11 @@ const StationForm = () => {
 const StationPage: NextPage = () => {
   return (
     <Layout>
-      <StationForm />
+      <Row className="justify-content-md-center">
+        <Col xs={12} md={4}>
+          <StationForm />
+        </Col>
+      </Row>
     </Layout>
   );
 };

@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import React, { useEffect, useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Col, Row } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Layout from "../../components/Layout";
 import {
@@ -41,8 +41,15 @@ const UserForm = () => {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
-  } = useForm<UpdateUser>();
+  } = useForm<UpdateUser>({
+    defaultValues: {
+      name: userEntity?.name,
+      login: userEntity?.login,
+      comment: userEntity?.comment,
+    },
+  });
 
   const onSubmitEdit: SubmitHandler<UpdateUser> = (data) => {
     usersApi
@@ -58,13 +65,14 @@ const UserForm = () => {
       )
       .then((res) => {
         console.log(res);
+        window.location.href = "/users";
       })
       .catch((err) => console.log(err));
   };
   return (
     <>
       <Link href={"/users"} passHref>
-        <Button variant="secondary" size="sm">
+        <Button variant="outline-secondary" size="sm">
           Back
         </Button>
       </Link>
@@ -72,7 +80,6 @@ const UserForm = () => {
         <Form.Group controlId="username">
           <Form.Label>User Name</Form.Label>
           <Form.Control
-            defaultValue={userEntity?.name}
             type="text"
             placeholder="Enter username"
             {...register("name", { required: true })}
@@ -81,7 +88,6 @@ const UserForm = () => {
         <Form.Group controlId="login" className="mt-2">
           <Form.Label>User Login</Form.Label>
           <Form.Control
-            defaultValue={userEntity?.login}
             type="text"
             placeholder="Enter user login"
             {...register("login", { required: true })}
@@ -89,12 +95,7 @@ const UserForm = () => {
         </Form.Group>
         <Form.Group className="mt-2" controlId="comment">
           <Form.Label>User Comment</Form.Label>
-          <Form.Control
-            defaultValue={userEntity?.comment}
-            as="textarea"
-            rows={3}
-            {...register("comment")}
-          />
+          <Form.Control as="textarea" rows={3} {...register("comment")} />
         </Form.Group>
         <Form.Group className="mt-2" controlId="password">
           <Form.Label>Password</Form.Label>
@@ -118,7 +119,11 @@ const UserForm = () => {
 const UserPage: NextPage = () => {
   return (
     <Layout>
-      <UserForm />
+      <Row className="justify-content-md-center">
+        <Col xs={12} md={4}>
+          <UserForm />
+        </Col>
+      </Row>
     </Layout>
   );
 };
