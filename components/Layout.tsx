@@ -4,7 +4,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import Navbar from "./Navbar";
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const LayoutComponent = (props: LayoutProps) => {
