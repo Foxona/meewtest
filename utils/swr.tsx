@@ -1,12 +1,6 @@
 import { paths, components } from "./schema";
 import useSWR from 'swr'
-import { Fetcher, Middleware, ApiResponse , TypedFetch} from "openapi-typescript-fetch"
-
-
-// type hack to override the body type
-function wb<F extends (...x: any) => any, S extends keyof components['schemas']>(fetchFn: F, opSchema: S) {
-    return fetchFn as any as (arg: components['schemas'][typeof opSchema], init?: RequestInit) => ReturnType<F>
-}
+import { Fetcher, Middleware, ApiResponse } from "openapi-typescript-fetch"
 
 const clientSide = (typeof window !== 'undefined')
 
@@ -33,17 +27,22 @@ export const GetStation = fetcher.path("/stations/{id}").method("get").create()
 export const GetUser = fetcher.path("/users/{id}").method("get").create()
 export const DelStation = fetcher.path("/stations/{id}").method("delete").create()
 export const DelUser = fetcher.path("/users/{id}").method("delete").create()
-// export const CreateStation = fetcher.path("/stations").method("post").create()
-export const CreateStation = wb(fetcher.path("/stations").method("post").create(), 'CreateStation')
+type CreateStationArg = components['schemas']['CreateStation'] // type hack
+export const CreateStation = (arg: CreateStationArg, init?: RequestInit) => fetcher.path("/stations").method("post").create()(arg as any, init)
 export const CreateUser = fetcher.path("/users").method("post").create()
 export const UpdateStation = fetcher.path("/stations/{id}").method("patch").create()
 export const UpdateUser = fetcher.path("/users/{id}").method("patch").create()
 export const ListStations = fetcher.path("/stations").method("get").create()
 
 
-type ApiFunc<D> = (..._: any) => Promise<ApiResponse<D>>
-type GetDataType<F> = F extends ApiFunc<infer D> ? D : never
+export type CreateStationType = GetParams<typeof CreateStation>;
+export type CreateUserType = GetParams<typeof CreateUser>;
+export type LoginType = GetParams<typeof Login>;
 
-export function useFetcher<F extends ApiFunc<D>, D = GetDataType<F>>(fn: F, ...params: Parameters<F>) {
-    return useSWR([fn, params], (request, init) => fn(...params).then(d => d.data))
+export type ApiFunc<D> = (..._: any) => Promise<ApiResponse<D>>
+export type GetDataType<F> = F extends ApiFunc<infer D> ? D : never
+export type GetParams<F extends ApiFunc<any>> = Parameters<F>[0]
+
+export function useFetcher<F extends ApiFunc<D>, D = GetDataType<F>>(fn: F, param: Parameters<F>[0] | false) {
+    return useSWR(param && [fn, param], () => fn(param).then(d => d.data))
 }

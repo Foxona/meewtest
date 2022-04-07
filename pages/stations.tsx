@@ -1,13 +1,11 @@
 import { NextPage } from "next";
 import Link from "next/link";
 import React, { useState } from "react";
-import { Button, Form, ListGroup, Modal } from "react-bootstrap";
+import { Accordion, Button, Form, ListGroup, Modal } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Layout from "../components/Layout";
 import * as api from "../utils/swr";
 
-// const token =
-//   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.nuILLQ7XJaxFMhhzPP9u-tID7S5opHSA9qaDCmAqE-I";
 
 const StationModal = (props: {
   showModal: boolean;
@@ -20,15 +18,12 @@ const StationModal = (props: {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<>();
+  } = useForm<api.CreateStationType>();
 
-  const onSubmit: SubmitHandler<> = (data) => {
+  const onSubmit: SubmitHandler<api.CreateStationType> = (data) => {
     setShowModal(false);
     api
-      .CreateStation({
-        name: data.name,
-        comment: data.comment,
-      })
+      .CreateStation(data)
       .then((res) => {
         mutate();
         console.log(res);
@@ -79,6 +74,8 @@ const StationModal = (props: {
 
 const StationList = () => {
   const { data: stations, mutate } = api.useFetcher(api.ListStations, {});
+  stations?.sort((a, b) => a.id - b.id);
+
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const handleRemove = (e: React.MouseEvent, id: number) => {

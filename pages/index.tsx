@@ -1,11 +1,14 @@
 import type { NextPage } from "next";
 import { useEffect } from "react";
+import { useRouter } from "next/router";
+
 import Layout from "../components/Layout";
 
 const Home: NextPage = () => {
+  const router = useRouter()
   useEffect(() => {
-    window.location.href = "/users";
-  }, []);
+    router.replace("/users");
+  }, [router]);
   return <Layout></Layout>;
 };
 

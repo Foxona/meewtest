@@ -7,38 +7,37 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import * as api from "../../utils/swr";
 
-const token =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.nuILLQ7XJaxFMhhzPP9u-tID7S5opHSA9qaDCmAqE-I";
+const StationForm = () => {
+  const router = useRouter();
+  const id = parseInt("" + router.query.station);
+  const { data: station, mutate } = api.useFetcher(
+    api.GetStation,
+    !!id && { id }
+  );
 
-const StationForm = (props) => {
-  const {
-    station: { created_at, updated_at, id, name, comment, api_key },
-  } = props;
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
-  } = useForm<>({});
+  } = useForm<api.CreateStationType>({});
 
-  const onSubmitEdit: SubmitHandler<> = (data) => {
+  const onSubmitEdit: SubmitHandler<api.CreateStationType> = (data) => {
     console.log(data);
-
-    // stationsApi
-    //   .updateStationStationsIdPatch(
-    //     42,
-    //     {
-    //       name: data.name,
-    //       comment: data.comment,
-    //     },
-    //     token
-    //   )
-    //   .then((res) => {
-    //     console.log(res);
-    //     window.location.href = "/stations";
-    //   })
-    //   .catch((err) => console.log(err));
+    api
+      .UpdateStation({ id, ...data })
+      .then((res) => {
+        mutate();
+        console.log(res);
+        router.push("/stations");
+      })
+      .catch((err) => console.log(err));
   };
+
+  if (!station) {
+    return <></>;
+  }
+
+  const { created_at, updated_at, name, comment, api_key } = station;
 
   return (
     <>
@@ -94,19 +93,11 @@ const StationForm = (props) => {
 };
 
 const StationPage: NextPage = () => {
-  const router = useRouter();
-  const id = parseInt(router.query.station);
-  const { data: station } = api.useFetcher(api.GetStation, {
-    id: id,
-  });
-
   return (
     <Layout>
       <Row className="justify-content-md-center">
         <Col xs={12} md={4}>
-          {station && (
-            <StationForm station={station} id={router.query.station} />
-          )}
+          <StationForm />
         </Col>
       </Row>
     </Layout>

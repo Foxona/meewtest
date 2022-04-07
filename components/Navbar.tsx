@@ -1,10 +1,12 @@
 import { Navbar, Container, Nav } from "react-bootstrap";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { Button } from "react-bootstrap";
 import { useEffect, useState } from "react";
 
 const NavbarComponent = () => {
   const [token, setToken] = useState<string>("");
+  const router = useRouter();
 
   useEffect(() => {
     setToken(window.localStorage.getItem("token") || "");
@@ -25,7 +27,7 @@ const NavbarComponent = () => {
               variant="outline-primary"
               onClick={() => {
                 window.localStorage.removeItem("token");
-                window.location.href = "/auth";
+                router.push("/auth");
               }}
             >
               Logout

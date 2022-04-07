@@ -6,9 +6,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import Layout from "../components/Layout";
 import * as api from "../utils/swr";
 
-// const token =
-//   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.nuILLQ7XJaxFMhhzPP9u-tID7S5opHSA9qaDCmAqE-I";
-
 const UserModal = (props: {
   showModal: boolean;
   setShowModal: (_: boolean) => void;
@@ -20,16 +17,11 @@ const UserModal = (props: {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<>();
+  } = useForm<api.CreateUserType>();
 
-  const onSubmit: SubmitHandler<> = (data) => {
+  const onSubmit: SubmitHandler<api.CreateUserType> = (data) => {
     api
-      .CreateUser({
-        name: data.name,
-        comment: data.comment,
-        login: data.login,
-        password: data.password,
-      })
+      .CreateUser(data)
       .then((res) => {
         console.log(res);
         mutate();
@@ -110,7 +102,7 @@ const UserModal = (props: {
 const UserList = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const { data: users, mutate } = api.useFetcher(api.ListUsers, {});
-
+  users?.sort((a, b) => a.id - b.id);
   const handleRemove = (e: React.MouseEvent, id: number) => {
     e.preventDefault();
     e.stopPropagation();

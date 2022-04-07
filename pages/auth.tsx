@@ -1,53 +1,36 @@
 import { NextPage } from "next";
+import Router from "next/router";
 import React, { useState } from "react";
-import { Button, Form, Row, Col, Toast } from "react-bootstrap";
+import { Button, Form, Row, Col } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Layout from "../components/Layout";
-import {
-  AuthApi,
-  UsersApi,
-  createConfiguration,
-  ServerConfiguration,
-  UserAuth,
-  CreateUser,
-} from "../api/";
+import * as api from "../utils/swr";
 
-const cfg = createConfiguration({
-  baseServer: new ServerConfiguration("https://ryikku.meew.me", {}),
-});
-const authApi = new AuthApi(cfg);
-const userApi = new UsersApi(cfg);
 
 const RegistrationWindow = (props: { setCreateUser: (_: boolean) => void }) => {
   const { setCreateUser } = props;
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm<CreateUser>();
+  } = useForm<api.CreateUserType>();
 
   const [show, setShow] = useState(false);
 
-  const onSubmit: SubmitHandler<CreateUser> = (data) => {
-    userApi
-      .createUserUsersPost({
-        name: data.name,
-        comment: data.comment,
-        login: data.login,
-        password: data.password,
-      })
+  const onSubmit: SubmitHandler<api.CreateUserType> = (data) => {
+    api
+      .CreateUser(data)
       .then((res) => {
         console.log(res);
         setShow(true);
-        userApi
-          .authUserUsersAuthPost({
+        api
+          .Login({
             login: data.login,
             password: data.password,
           })
           .then((res) => {
-            window.localStorage.setItem("token", res.user_jwt);
-            window.location.href = "/users";
+            window.localStorage.setItem("token", res.data.user_jwt);
+            Router.push("/users");
           });
       })
       .catch((err) => console.log(err));
@@ -120,22 +103,23 @@ const LoginWindow = (props: { setCreateUser: (_: boolean) => void }) => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm<UserAuth>();
+  } = useForm<api.LoginType>();
 
-  const onSubmit: SubmitHandler<UserAuth> = (data) => {
-    authApi
-      .authUserUsersAuthPost({
-        login: data.login,
-        password: data.password,
-      })
+  const [wrongCred, setWrongCred] = useState(false);
+
+  const onSubmit: SubmitHandler<api.LoginType> = (data) => {
+    setWrongCred(false);
+    api
+      .Login({ login: data.login, password: data.password })
       .then((res) => {
-        console.log(res.user_jwt);
-        window.localStorage.setItem("token", res.user_jwt);
-        window.location.href = "/users";
+        window.localStorage.setItem("token", res.data.user_jwt);
+        Router.push("/users")
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        setWrongCred(true);
+      });
   };
 
   return (
@@ -164,6 +148,9 @@ const LoginWindow = (props: { setCreateUser: (_: boolean) => void }) => {
           <span className="text-danger">Password is required</span>
         )}
       </p>
+      {wrongCred && (
+        <div className="mb-3 alert alert-danger">Wrong login or password</div>
+      )}
       <div className="d-flex align-items-center gap-3">
         <Button variant="primary" type="submit">
           Login
