@@ -1,12 +1,18 @@
 import { paths, components } from "./schema";
 import useSWR from 'swr'
-import { Fetcher, Middleware, ApiResponse } from "openapi-typescript-fetch"
+import { Fetcher, Middleware, ApiResponse, ApiError } from "openapi-typescript-fetch"
+import Router from "next/router"
 
 const clientSide = (typeof window !== 'undefined')
 
 const patchHeader: Middleware = async (url, init, next) => {
     const token = clientSide ? localStorage.getItem('token') : null
     const response = await next(url, !token ? init : { ...init, headers: { ...init.headers, "user-jwt": token, "content-type": "application/json" } } as any)
+        .catch(err => {
+            const error = (err as ApiError)
+            if (error.status === 403) Router.replace("/auth")
+            throw err
+        })
     return response
 }
 
@@ -33,7 +39,6 @@ export const CreateUser = fetcher.path("/users").method("post").create()
 export const UpdateStation = fetcher.path("/stations/{id}").method("patch").create()
 export const UpdateUser = fetcher.path("/users/{id}").method("patch").create()
 export const ListStations = fetcher.path("/stations").method("get").create()
-
 
 export type CreateStationType = GetParams<typeof CreateStation>;
 export type CreateUserType = GetParams<typeof CreateUser>;
