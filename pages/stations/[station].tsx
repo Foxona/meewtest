@@ -39,7 +39,7 @@ const StationForm = () => {
   const [showClipboard, setShowClipboard] = useState("");
 
   if (!station) {
-    return <></>;
+    return <div></div>;
   }
 
   const { created_at, updated_at, name, comment, api_key } = station;

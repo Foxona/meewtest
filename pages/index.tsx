@@ -9,7 +9,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     router.replace("/users");
   }, [router]);
-  return <Layout></Layout>;
+  return <Layout><div/></Layout>;
 };
 
 export default Home;

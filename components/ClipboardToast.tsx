@@ -10,7 +10,7 @@ type ClipboardToastProps = {
 const ClipboardToast = ({ message, setMessage, x, y }: ClipboardToastProps) => {
   navigator.clipboard.writeText(message);
   if (x + 350 > window.innerWidth) {
-    return <></>
+    return <div></div>
   }
   return (
     <Toast

@@ -34,7 +34,7 @@ const UserForm = () => {
         </div>
       );
     }
-    return <></>;
+    return <div></div>;
   }
   return (
     <>

@@ -104,7 +104,7 @@ const StationList = () => {
   }
 
   if (!stations) {
-    return <></>;
+    return <div></div>;
   }
 
   return (

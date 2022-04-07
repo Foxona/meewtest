@@ -6,14 +6,13 @@ interface LayoutProps {
 }
 
 const LayoutComponent = (props: LayoutProps) => {
-  //  make responsive layout component with ant design
   return (
     <>
       <Navbar />
       <div className="bg-light border p-3 min-vh-100">
         <Container fluid className="container-sm">
           <Row>
-            <Col>{props.children}</Col>
+            <Col>{props.children as any}</Col>
           </Row>
         </Container>
       </div>

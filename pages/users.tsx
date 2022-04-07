@@ -115,7 +115,7 @@ const UserList = () => {
   }
 
   if (!users) {
-    return <></>;
+    return <div></div>;
   }
 
   return (
