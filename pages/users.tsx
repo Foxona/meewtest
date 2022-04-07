@@ -1,11 +1,11 @@
 import { NextPage } from "next";
 import Link from "next/link";
 import { useState } from "react";
-import { Button, Form, ListGroup, Modal } from "react-bootstrap";
+import { Button, Form, ListGroup, Modal, Accordion } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Layout from "../components/Layout";
 import * as api from "../utils/swr";
-
+import { toDate } from "../utils/date";
 const UserModal = (props: {
   showModal: boolean;
   setShowModal: (_: boolean) => void;
@@ -20,13 +20,11 @@ const UserModal = (props: {
   } = useForm<api.CreateUserType>();
 
   const onSubmit: SubmitHandler<api.CreateUserType> = (data) => {
-    api
-      .CreateUser(data)
-      .then((res) => {
-        console.log(res);
-        mutate();
-        setShowModal(false);
-      });
+    api.CreateUser(data).then((res) => {
+      console.log(res);
+      mutate();
+      setShowModal(false);
+    });
   };
 
   const handleClose = () => setShowModal(false);
@@ -42,7 +40,7 @@ const UserModal = (props: {
             <Form.Group controlId="username">
               <Form.Label>User Name</Form.Label>
               <Form.Control
-                placeholder="Enter Username"
+                placeholder="John Doe"
                 autoFocus
                 {...register("name", { required: true })}
               />
@@ -56,7 +54,7 @@ const UserModal = (props: {
               <Form.Label>Login</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter users login"
+                placeholder="johndoe_142"
                 autoFocus
                 {...register("login", { required: true })}
               />
@@ -70,7 +68,7 @@ const UserModal = (props: {
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
-                placeholder="Enter users password"
+                placeholder="enter password"
                 autoFocus
                 {...register("password", { required: true })}
               />
@@ -101,8 +99,8 @@ const UserModal = (props: {
 
 const UserList = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
-  const { data: users, mutate } = api.useFetcher(api.ListUsers, {});
-  users?.sort((a, b) => a.id - b.id);
+  const { data: users, mutate, error } = api.useFetcher(api.ListUsers, {});
+  if (users) users.sort((a, b) => a.id - b.id);
   const handleRemove = (e: React.MouseEvent, id: number) => {
     e.preventDefault();
     e.stopPropagation();
@@ -111,6 +109,10 @@ const UserList = () => {
       mutate();
     });
   };
+
+  if (error) {
+    return <div className="alert alert-danger">{error?.data?.error}</div>;
+  }
 
   if (!users) {
     return <></>;
@@ -130,48 +132,65 @@ const UserList = () => {
         mutate={mutate}
       />
       <ListGroup as="ol" numbered>
-        {users.map((user) => (
-          <Link key={user.id} href={`/users/${user.id}`} passHref>
-            <ListGroup.Item
-              as="li"
-              className="d-flex justify-content-between align-items-start"
-            >
-              <div className="ms-2 me-auto">
-                <div>
-                  Name: <span className="fw-bold">{user.name}</span>
-                </div>
-                <div>
-                  Login: <span className="fw-bold">{user.login}</span>
-                </div>
-                <div>
-                  User Id: <span className="fw-bold">{user.id}</span>
-                </div>
-                <div>
-                  Comment: <span className="fw-bold">{user.comment}</span>
-                </div>
-                <div>
-                  Created at: <span className="fw-bold">{user.created_at}</span>
-                </div>
-                {user.updated_at && (
-                  <div>
-                    Updated at:{" "}
-                    <span className="fw-bold">{user.updated_at}</span>
-                  </div>
-                )}
-              </div>
-              <div>
-                <div className="d-flex gap-2">
-                  <Button
-                    variant="outline-danger"
+        <Accordion defaultActiveKey="0" alwaysOpen>
+          {users.map((user) => (
+            <Accordion.Item eventKey={`${user.id}`} key={user.id}>
+              <Accordion.Header>{user.name}</Accordion.Header>
+              <Accordion.Body className="p-0">
+                <ListGroup.Item
+                  as="li"
+                  className="d-flex justify-content-between align-items-start  overflow-scroll"
+                >
+                  <table className="table">
+                    <tbody>
+                      <tr>
+                        <th scope="row" className="col-md-1">Name</th>
+                        <td className="col-md-6">{user.name}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">Login</th>
+                        <td className="col-md-6">{user.login}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">User</th>
+                        <td className="col-md-6">{user.id}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">Comment</th>
+                        <td className="col-md-6">{user.comment}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">Created</th>
+                        <td className="col-md-6">{toDate(user.created_at)}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">Updated&nbsp;at</th>
+                        <td className="col-md-6">{user.updated_at && toDate(user.updated_at)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </ListGroup.Item>
+                <ListGroup.Item className="d-flex">
+                  <Link key={user.id} href={`/users/${user.id}`} passHref>
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary m-1"
+                    >
+                      edit user
+                    </button>
+                  </Link>
+                  <button
                     onClick={(e) => handleRemove(e, user.id)}
+                    type="button"
+                    className="btn btn-outline-danger btn-sm m-1 ms-auto"
                   >
-                    Remove <i className="bi bi-trash3"></i>
-                  </Button>
-                </div>
-              </div>
-            </ListGroup.Item>
-          </Link>
-        ))}
+                    delete
+                  </button>
+                </ListGroup.Item>
+              </Accordion.Body>
+            </Accordion.Item>
+          ))}
+        </Accordion>
       </ListGroup>
     </>
   );

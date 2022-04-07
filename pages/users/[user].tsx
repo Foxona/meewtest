@@ -6,7 +6,7 @@ import { Button, Col, Form, Row } from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Layout from "../../components/Layout";
 import * as api from "../../utils/swr";
-import useSWR from "swr";
+import { toDate } from "../../utils/date";
 
 const UserForm = () => {
   const router = useRouter();
@@ -25,10 +25,14 @@ const UserForm = () => {
       router.push("/users");
     });
   };
-  
+
   if (!user) {
     if (error) {
-      return <div className="alert alert-danger">Error: {error?.data?.error || JSON.stringify(error)}</div>;
+      return (
+        <div className="alert alert-danger">
+          Error: {error?.data?.error || JSON.stringify(error)}
+        </div>
+      );
     }
     return <></>;
   }
@@ -36,7 +40,7 @@ const UserForm = () => {
     <>
       <Link href={"/users"} passHref>
         <Button variant="outline-secondary" size="sm">
-          {"<-"}
+          <i className="bi bi-arrow-left"></i>
         </Button>
       </Link>
       <Form className="mt-2" onSubmit={handleSubmit(onSubmitEdit)}>
@@ -75,14 +79,25 @@ const UserForm = () => {
             {...register("comment")}
           />
         </Form.Group>
+        <p> </p>
         <Form.Group controlId="password">
           <Form.Label>Password</Form.Label>
           <Form.Control {...register("password")} type="password" />
         </Form.Group>
-        <div className="d-flex flex-column mt-2">
-          <span>User Id: {user.id}</span>
-          <span>Created At: {user.created_at}</span>
-          {user.updated_at && <span>Updated At: {user.updated_at}</span>}
+        <p> </p>
+        <div className="input-group mb-3">
+          <span className="input-group-text col-5 col-lg-3"> User Id </span>
+          <input disabled type="text" className="form-control" value={user.id} />
+        </div>
+        <p> </p>
+        <div className="input-group mb-3">
+          <span className="input-group-text col-5 col-lg-3"> Created </span>
+          <input disabled type="text" className="form-control" value={toDate(user.created_at)} />
+        </div>
+        <p> </p>
+        <div className="input-group mb-3">
+          <span className="input-group-text col-5 col-lg-3"> Updated at </span>
+          <input disabled type="text" className="form-control" value={user.updated_at && toDate(user.updated_at)} />
         </div>
         <Button className="mt-3" variant="primary" type="submit">
           Save
@@ -96,7 +111,7 @@ const UserPage: NextPage = () => {
   return (
     <Layout>
       <Row className="justify-content-md-center">
-        <Col xs={12} md={4}>
+        <Col xs={12} lg={6}>
           <UserForm />
         </Col>
       </Row>

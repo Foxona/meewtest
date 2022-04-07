@@ -111,7 +111,7 @@ const LoginWindow = (props: { setCreateUser: (_: boolean) => void }) => {
   const onSubmit: SubmitHandler<api.LoginType> = (data) => {
     setWrongCred(false);
     api
-      .Login({ login: data.login, password: data.password })
+      .Login(data)
       .then((res) => {
         window.localStorage.setItem("token", res.data.user_jwt);
         Router.push("/users")
@@ -125,10 +125,10 @@ const LoginWindow = (props: { setCreateUser: (_: boolean) => void }) => {
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <Form.Group controlId="formBasicEmail">
-        <Form.Label>Email address</Form.Label>
+        <Form.Label>Login</Form.Label>
         <Form.Control
           type="login"
-          placeholder="Enter email"
+          placeholder="johndoe"
           {...register("login", { required: true })}
         />
       </Form.Group>
@@ -139,7 +139,7 @@ const LoginWindow = (props: { setCreateUser: (_: boolean) => void }) => {
         <Form.Label>Password</Form.Label>
         <Form.Control
           type="password"
-          placeholder="Password"
+          placeholder="password"
           {...register("password", { required: true })}
         />
       </Form.Group>

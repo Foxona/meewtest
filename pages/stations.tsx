@@ -1,11 +1,19 @@
 import { NextPage } from "next";
 import Link from "next/link";
 import React, { useState } from "react";
-import { Accordion, Button, Form, ListGroup, Modal } from "react-bootstrap";
+import {
+  Accordion,
+  Button,
+  Form,
+  ListGroup,
+  Modal,
+  Toast,
+} from "react-bootstrap";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Layout from "../components/Layout";
+import ClipboardToast from "../components/ClipboardToast";
 import * as api from "../utils/swr";
-
+import { toDate } from "../utils/date";
 
 const StationModal = (props: {
   showModal: boolean;
@@ -22,12 +30,10 @@ const StationModal = (props: {
 
   const onSubmit: SubmitHandler<api.CreateStationType> = (data) => {
     setShowModal(false);
-    api
-      .CreateStation(data)
-      .then((res) => {
-        mutate();
-        console.log(res);
-      });
+    api.CreateStation(data).then((res) => {
+      mutate();
+      console.log(res);
+    });
   };
 
   const handleClose = () => setShowModal(false);
@@ -73,10 +79,16 @@ const StationModal = (props: {
 };
 
 const StationList = () => {
-  const { data: stations, mutate } = api.useFetcher(api.ListStations, {});
-  stations?.sort((a, b) => a.id - b.id);
+  const {
+    data: stations,
+    mutate,
+    error,
+  } = api.useFetcher(api.ListStations, {});
+  if (stations) stations.sort((a, b) => a.id - b.id);
 
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showClipboard, setShowClipboard] = useState<string>("");
+  const [xy, setxy] = useState({ x: 0, y: 0 });
 
   const handleRemove = (e: React.MouseEvent, id: number) => {
     e.preventDefault();
@@ -86,6 +98,10 @@ const StationList = () => {
       mutate();
     });
   };
+
+  if (error) {
+    return <div className="alert alert-danger">{error?.data?.error}</div>;
+  }
 
   if (!stations) {
     return <></>;
@@ -104,64 +120,103 @@ const StationList = () => {
         showModal={showModal}
         setShowModal={setShowModal}
       />
+      {showClipboard && (
+        <ClipboardToast
+          x={xy.x}
+          y={xy.y}
+          message={showClipboard}
+          setMessage={setShowClipboard}
+        />
+      )}
       <ListGroup as="ol" numbered>
-        {stations.map((station) => (
-          // <div key={station.id} >
-          <Link key={station.id} href={`/stations/${station.id}`} passHref>
-            <ListGroup.Item
-              style={{ cursor: "pointer" }}
-              as="li"
-              className="d-flex justify-content-between align-items-start"
-            >
-              <div className="ms-2 me-auto">
-                <div>
-                  Station: <span className="fw-bold">{station.name}</span>
-                </div>
-                <div className="mt-1">
-                  Id: <span className="fw-bold">{station.id}</span>
-                </div>
-                <div className="mt-1">
-                  Comment: <span className="fw-bold">{station.comment}</span>
-                </div>
-                <div className="mt-1">
-                  ApiKey:{" "}
-                  <span className="fw-bold">
-                    <a
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                      className="text-primary"
-                    >
-                      {station.api_key}
-                    </a>
-                  </span>
-                </div>
-                <div className="mt-1">
-                  Created at:{" "}
-                  <span className="fw-bold">{station.created_at}</span>
-                </div>
-                {station.updated_at && (
-                  <div className="mt-1">
-                    Updated at:{" "}
-                    <span className="fw-bold">{station.updated_at}</span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <div className="d-flex gap-2">
-                  <Button
-                    variant="outline-danger"
-                    onClick={(e) => handleRemove(e, station.id)}
+        <Accordion defaultActiveKey="0" alwaysOpen>
+          {stations.map((station) => (
+            <Accordion.Item eventKey={`${station.id}`} key={station.id}>
+              <Accordion.Header>{station.name}</Accordion.Header>
+              <Accordion.Body className="p-0">
+                <ListGroup.Item
+                  as="li"
+                  className="d-flex justify-content-between align-items-start"
+                >
+                  <table className="table">
+                    <tbody>
+                      <tr>
+                        <th scope="row" className="col-md-1">
+                          Name
+                        </th>
+                        <td className="col-md-6">{station.name}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">
+                          ID
+                        </th>
+                        <td className="col-md-6">{station.id}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">
+                          API&nbsp;Key
+                        </th>
+                        <td className="col-md-6 text-primary">
+                          <span
+                            onClick={(e) => {
+                              setxy({ x: e.clientX, y: e.clientY });
+                              setShowClipboard(station.api_key);
+                            }}
+                          >
+                            {station.api_key}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">
+                          Comment
+                        </th>
+                        <td className="col-md-6">{station.comment}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">
+                          Created
+                        </th>
+                        <td className="col-md-6">
+                          {toDate(station.created_at)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row" className="col-md-1">
+                          Updated&nbsp;at
+                        </th>
+                        <td className="col-md-6">
+                          {station.updated_at && toDate(station.updated_at)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </ListGroup.Item>
+                <ListGroup.Item className="d-flex">
+                  <Link
+                    key={station.id}
+                    href={`/stations/${station.id}`}
+                    passHref
                   >
-                    Remove <i className="bi bi-trash3"></i>
-                  </Button>
-                </div>
-              </div>
-            </ListGroup.Item>
-          </Link>
-        ))}
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary m-1"
+                    >
+                      edit station
+                    </button>
+                  </Link>
+                  <button
+                    onClick={(e) => handleRemove(e, station.id)}
+                    type="button"
+                    className="btn btn-outline-danger btn-sm m-1 ms-auto"
+                  >
+                    delete
+                  </button>
+                </ListGroup.Item>
+              </Accordion.Body>
+            </Accordion.Item>
+          ))}
+        </Accordion>
       </ListGroup>
     </>
   );
