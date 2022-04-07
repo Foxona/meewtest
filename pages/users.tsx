@@ -1,42 +1,30 @@
 import { NextPage } from "next";
-import { useEffect, useState } from "react";
-import { Badge, Button, Form, ListGroup, Modal } from "react-bootstrap";
-import { SubmitHandler, useForm } from "react-hook-form";
-import {
-  createConfiguration,
-  CreateStation,
-  ServerConfiguration,
-  User,
-  UsersApi,
-  CreateUser,
-} from "../api";
-import Layout from "../components/Layout";
 import Link from "next/link";
+import { useState } from "react";
+import { Button, Form, ListGroup, Modal } from "react-bootstrap";
+import { SubmitHandler, useForm } from "react-hook-form";
+import Layout from "../components/Layout";
+import * as api from "../utils/swr";
 
 // const token =
 //   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.nuILLQ7XJaxFMhhzPP9u-tID7S5opHSA9qaDCmAqE-I";
 
-const cfg = createConfiguration({
-  baseServer: new ServerConfiguration("https://ryikku.meew.me", {}),
-});
-const usersApi = new UsersApi(cfg);
-
 const UserModal = (props: {
   showModal: boolean;
   setShowModal: (_: boolean) => void;
+  mutate: () => void;
 }) => {
-  const { showModal, setShowModal } = props;
+  const { showModal, setShowModal, mutate } = props;
 
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm<CreateUser>();
+  } = useForm<>();
 
-  const onSubmit: SubmitHandler<CreateUser> = (data) => {
-    usersApi
-      .createUserUsersPost({
+  const onSubmit: SubmitHandler<> = (data) => {
+    api
+      .CreateUser({
         name: data.name,
         comment: data.comment,
         login: data.login,
@@ -44,9 +32,9 @@ const UserModal = (props: {
       })
       .then((res) => {
         console.log(res);
-        window.location.href = "/users";
-      })
-      .catch((err) => console.log(err));
+        mutate();
+        setShowModal(false);
+      });
   };
 
   const handleClose = () => setShowModal(false);
@@ -119,19 +107,22 @@ const UserModal = (props: {
   );
 };
 
-const UserList = (props: { users: User[] }) => {
+const UserList = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
-  const { users } = props;
+  const { data: users, mutate } = api.useFetcher(api.ListUsers, {});
 
   const handleRemove = (e: React.MouseEvent, id: number) => {
     e.preventDefault();
     e.stopPropagation();
-
-    usersApi.deleteUserUsersIdDelete(id, token).then((res) => {
+    api.DelUser({ id }).then((res) => {
       console.log(res);
-      window.location.href = "/users";
+      mutate();
     });
   };
+
+  if (!users) {
+    return <></>;
+  }
 
   return (
     <>
@@ -141,15 +132,14 @@ const UserList = (props: { users: User[] }) => {
           Create User
         </Button>
       </div>
-      <UserModal showModal={showModal} setShowModal={setShowModal} />
+      <UserModal
+        showModal={showModal}
+        setShowModal={setShowModal}
+        mutate={mutate}
+      />
       <ListGroup as="ol" numbered>
         {users.map((user) => (
-          <Link
-            key={user.id}
-            href={`/users/[...user]`}
-            as={`/users/user/${user.id}`}
-            passHref
-          >
+          <Link key={user.id} href={`/users/${user.id}`} passHref>
             <ListGroup.Item
               as="li"
               className="d-flex justify-content-between align-items-start"
@@ -168,17 +158,12 @@ const UserList = (props: { users: User[] }) => {
                   Comment: <span className="fw-bold">{user.comment}</span>
                 </div>
                 <div>
-                  Created at:{" "}
-                  <span className="fw-bold">
-                    {user.created_at.toUTCString()}
-                  </span>
+                  Created at: <span className="fw-bold">{user.created_at}</span>
                 </div>
                 {user.updated_at && (
                   <div>
                     Updated at:{" "}
-                    <span className="fw-bold">
-                      {user.updated_at.toUTCString()}
-                    </span>
+                    <span className="fw-bold">{user.updated_at}</span>
                   </div>
                 )}
               </div>
@@ -201,18 +186,9 @@ const UserList = (props: { users: User[] }) => {
 };
 
 const UsersPage: NextPage = () => {
-  const [users, setUsers] = useState<User[]>([]);
-
-  useEffect(() => {
-    const token = window.localStorage.getItem("token");
-    usersApi.listUsersUsersGet(token as string).then((res) => {
-      setUsers(res);
-    });
-  }, []);
-
   return (
     <Layout>
-      <UserList users={users} />
+      <UserList />
     </Layout>
   );
 };

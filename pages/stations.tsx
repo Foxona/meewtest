@@ -1,53 +1,38 @@
 import { NextPage } from "next";
-import React, { SetStateAction, useEffect, useState } from "react";
-import Layout from "../components/Layout";
-import {
-  createConfiguration,
-  ServerConfiguration,
-  StationsApi,
-  Station,
-  CreateStation,
-} from "../api";
-import { Badge, ListGroup, Button, Modal, Form } from "react-bootstrap";
-import { SubmitHandler, useForm } from "react-hook-form";
-import useSWR from "swr";
 import Link from "next/link";
+import React, { useState } from "react";
+import { Button, Form, ListGroup, Modal } from "react-bootstrap";
+import { SubmitHandler, useForm } from "react-hook-form";
+import Layout from "../components/Layout";
+import * as api from "../utils/swr";
 
 // const token =
 //   "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjF9.nuILLQ7XJaxFMhhzPP9u-tID7S5opHSA9qaDCmAqE-I";
 
-const cfg = createConfiguration({
-  baseServer: new ServerConfiguration("https://ryikku.meew.me", {}),
-});
-const stationsApi = new StationsApi(cfg);
-
 const StationModal = (props: {
   showModal: boolean;
   setShowModal: (_: boolean) => void;
+  mutate: () => void;
 }) => {
-  const { showModal, setShowModal } = props;
+  const { showModal, setShowModal, mutate } = props;
 
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm<CreateStation>();
+  } = useForm<>();
 
-  const onSubmit: SubmitHandler<CreateStation> = (data) => {
-    stationsApi
-      .createStationStationsPost(
-        {
-          name: data.name,
-          comment: data.comment,
-        },
-        token
-      )
-      .then((res) => {
-        console.log(res);
-        window.location.href = "/stations";
+  const onSubmit: SubmitHandler<> = (data) => {
+    setShowModal(false);
+    api
+      .CreateStation({
+        name: data.name,
+        comment: data.comment,
       })
-      .catch((err) => console.log(err.response));
+      .then((res) => {
+        mutate();
+        console.log(res);
+      });
   };
 
   const handleClose = () => setShowModal(false);
@@ -92,19 +77,22 @@ const StationModal = (props: {
   );
 };
 
-const StationList = (props: { stations: Station[] }) => {
+const StationList = () => {
+  const { data: stations, mutate } = api.useFetcher(api.ListStations, {});
   const [showModal, setShowModal] = useState<boolean>(false);
-  const { stations } = props;
 
   const handleRemove = (e: React.MouseEvent, id: number) => {
     e.preventDefault();
     e.stopPropagation();
-
-    stationsApi.deleteStationStationsIdDelete(id, token).then((res) => {
+    api.DelStation({ id }).then((res) => {
       console.log(res);
-      window.location.href = "/stations";
+      mutate();
     });
   };
+
+  if (!stations) {
+    return <></>;
+  }
 
   return (
     <>
@@ -114,16 +102,15 @@ const StationList = (props: { stations: Station[] }) => {
           Create Station
         </Button>
       </div>
-      <StationModal showModal={showModal} setShowModal={setShowModal} />
+      <StationModal
+        mutate={mutate}
+        showModal={showModal}
+        setShowModal={setShowModal}
+      />
       <ListGroup as="ol" numbered>
         {stations.map((station) => (
           // <div key={station.id} >
-          <Link
-            key={station.id}
-            href={`/stations/[...station]`}
-            as={`/stations/station/${station.id}`}
-            passHref
-          >
+          <Link key={station.id} href={`/stations/${station.id}`} passHref>
             <ListGroup.Item
               style={{ cursor: "pointer" }}
               as="li"
@@ -155,16 +142,12 @@ const StationList = (props: { stations: Station[] }) => {
                 </div>
                 <div className="mt-1">
                   Created at:{" "}
-                  <span className="fw-bold">
-                    {station.created_at.toUTCString()}
-                  </span>
+                  <span className="fw-bold">{station.created_at}</span>
                 </div>
                 {station.updated_at && (
                   <div className="mt-1">
                     Updated at:{" "}
-                    <span className="fw-bold">
-                      {station.updated_at.toUTCString()}
-                    </span>
+                    <span className="fw-bold">{station.updated_at}</span>
                   </div>
                 )}
               </div>
@@ -188,18 +171,9 @@ const StationList = (props: { stations: Station[] }) => {
 };
 
 const Stations: NextPage = () => {
-  const [stations, setStations] = useState<Station[]>([]);
-
-  useEffect(() => {
-    const token = window.localStorage.getItem("token");
-    stationsApi.listStationsStationsGet(token as string).then((res) => {
-      setStations(res);
-    });
-  }, []);
-
   return (
     <Layout>
-      <StationList stations={stations} />
+      <StationList />
     </Layout>
   );
 };

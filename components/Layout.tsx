@@ -1,5 +1,3 @@
-import { Layout } from "antd";
-import { ReactChildren } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import Navbar from "./Navbar";
 
